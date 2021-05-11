@@ -59,10 +59,19 @@ def show_graph(res):
     for res in res:
         for item in res:
             if str(type(item)) == "<class 'py2neo.data.Node'>":
-                node = {'id': item.identity, 'name': item['name'], 'type': item['type']}
+                node = {'id': str(item.identity), 'name': item['name'], 'type': item['type']}
+                node['std_no'] = ""
+                node['std_name'] = ""
+                if node['type'] == "标准":
+                    the_name = node['name'].split('##')
+                    if len(the_name) == 2:
+                        node['std_no'] = the_name[0]
+                        node['std_name'] = the_name[1]
+                    elif len(the_name) == 1:
+                        node['std_no'] = the_name[0]
                 data["nodes"].append(node)
             elif str(type(item)) == "<class 'py2neo.data.Relation'>":
-                edge = {'source': item.start_node.identity, 'target': item.end_node.identity, 'relation': item['name']}
+                edge = {'source': str(item.start_node.identity), 'target': str(item.end_node.identity), 'relation': item['name']}
                 data["edges"].append(edge)
     data['nodes'] = unique(data['nodes'])
     data['edges'] = unique(data['edges'])
