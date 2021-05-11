@@ -22,7 +22,7 @@ def unique(data: list):
 
 def search(keyword: str, mode='contain'):
     """
-    按照结点名称查找图中的结点，返回结点的列表，其元素为Node格式。函数有2中模式"exact"精确模式（默认）和"contain"包含模式。
+    按照结点名称查找图中的结点，返回结点的列表，其元素为Node格式。函数有2种模式"exact"精确模式和"contain"包含模式（默认）。
     """
     if keyword.replace(" ", "") == "":
         return []
@@ -33,7 +33,7 @@ def search(keyword: str, mode='contain'):
         node = nodes.match(name=keyword).all()
         return node
     elif mode == "contain":
-        # 搜索文本可以用"@@"分隔开，以实现多关键词搜索，搜索条件为必须同时包含分隔开的所有关键词
+        # 搜索文本可以用","分隔开，以实现多关键词搜索，搜索条件为只需包含一个分隔开的关键词
         keyword = keyword.split(",")
         nodes = NodeMatcher(graph)
         node = []
@@ -42,15 +42,16 @@ def search(keyword: str, mode='contain'):
         final_node = node[0]
         for item in node:
             final_node = set(final_node).union(set(item))
-        if (len(final_node) > 100):
+        if len(final_node) > 100:
             final_node = list(final_node)[0:100]
         return final_node
 
 
 def show_graph(res):
     """
-    # 此函数的输入为py2neo语句graph.run("SOME CYPHER QUERY").to_ndarray(dtype = object)的结果，其中CYPHER语句返回的
-    # 的内容应该是结点和边，即类型为"Node"或"Relation", 此函数的返回数据为data字典，格式为所要求graph的结点与边分离的数据格式.
+    此函数的输入为py2neo语句graph.run("SOME CYPHER QUERY").to_ndarray(dtype = object)的结果，
+    其中CYPHER语句返回的内容应该是结点和边，即类型为"Node"或"Relation", 此函数的返回数据为data字典，
+    格式为所要求graph的结点与边分离的数据格式.
     """
 
     data = {"nodes": [],
@@ -92,6 +93,18 @@ def get_id_list(nodes: list):
 
 
 def nodes_to_graphs(nodes=None, jumps=0):
+    """
+    通过节点ID列表，搜索节点和节点间的关系（直接、1跳或2跳），返回构成的图。
+
+    注意，此方法需要多次的两两节点间遍历，时间复杂度为O(N^2），N为节点数量，因此在节点数量较多时候，运行较慢。
+    建议节点数在50及以下时使用。
+
+    :param nodes: 节点ID的列表
+    :param jumps: 跳数， 0表示只包含直接关系（0跳），1代表0跳和1跳，2代表0跳、1跳和2跳
+    :return: 节点和其中的关系（直接或间接）构成的图
+
+    """
+
     if nodes is None:
         nodes = ["1994", "1962", "1595"]
     for i in range(len(nodes)):
