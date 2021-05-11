@@ -34,14 +34,14 @@ def search(keyword: str, mode='contain'):
         return node
     elif mode == "contain":
         # 搜索文本可以用"@@"分隔开，以实现多关键词搜索，搜索条件为必须同时包含分隔开的所有关键词
-        keyword = keyword.split("@@")
+        keyword = keyword.split(",")
         nodes = NodeMatcher(graph)
         node = []
         for item in keyword:
-            node.append(nodes.match(name=CONTAINS(item)).order_by("size(_.name)").all())
+            node.append(nodes.match(name=CONTAINS(item), type='标准').order_by("size(_.name)").all())
         final_node = node[0]
         for item in node:
-            final_node = set(final_node).intersection(set(item))
+            final_node = set(final_node).union(set(item))
         if (len(final_node) > 100):
             final_node = list(final_node)[0:100]
         return final_node
@@ -76,7 +76,7 @@ def one_jump_graph(name):
     if type(name) != str:
         name = str(name)
 
-    cypher_command = "match (a)-[b]-(c) where a.name = '" + name + "' return a,b,c"
+    cypher_command = "match (a)-[b]-(c) where id(a) = " + name + " return a,b,c"
     res = graph.run(cypher_command)
     return res
 
