@@ -30,6 +30,12 @@ def search_nodes():
     return res
 '''
 
+@app.route('/init', methods=['POST'])
+def init():
+    data = request.json
+    print(data)
+    print(type(data))
+    return "type(data)"
 
 @app.route('/search_graph_slow', methods=['POST'])
 def search_graph_slow():
@@ -44,7 +50,6 @@ def search_graph_slow():
     返回：
         所有ID对应的标准的一跳图，以及所有节点间的直接关系。例如， 标准1的一跳节点与标准2的一跳节点之间若有关系，则该关系也会被返回。
 
-
     """
     res = {
         "code": 400,
@@ -52,7 +57,7 @@ def search_graph_slow():
         "msg": "failure"
     }
     try:
-        the_request = request.form
+        the_request = request.json
         the_request = dict(the_request)
         keyword = the_request['keyword']
         search_result = search(keyword, mode="contain")
@@ -96,7 +101,7 @@ def search_graph_fast():
         "msg": "failure"
     }
     try:
-        the_request = request.form
+        the_request = request.json
         the_request = dict(the_request)
         keyword = the_request['keyword']
         search_result = search(keyword, mode="contain")
